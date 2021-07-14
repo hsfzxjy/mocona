@@ -52,7 +52,7 @@ static void ScopeStack_dealloc(ScopeStackObject *self) {
 }
 
 static PyObject *ScopeStack_getvar(ScopeStackObject *self, PyObject *decl) {
-    return (PyObject *)Var_New(self, (DeclObject *)decl);
+    return ScopeStack_GetVar(self, (DeclObject *)decl);
 }
 
 static PyMethodDef ScopeStack_methods[] = {
@@ -290,4 +290,9 @@ CellObject *ScopeStack_FindCell(ScopeStackObject *self, PyObject *decl) {
     return Scope_FindCell(scope, decl);
 except:
     return NULL;
+}
+
+PROTECTED PyObject *
+          ScopeStack_GetVar(ScopeStackObject *self, DeclObject *decl) {
+    return (PyObject *)Var_New(self, decl);
 }

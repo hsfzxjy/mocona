@@ -2,6 +2,7 @@
 #define _SCOPEDVAR_SCOPESTACKOBJECT_H
 
 #include "common.h"
+#include "declobject.h"
 #include "scopeobject.h"
 
 PROTECTED PyTypeObject ScopeStackObject_Type;
@@ -20,6 +21,7 @@ PROTECTED CellObject *
 PROTECTED int ScopeStack_PushScope(ScopeStackObject *self, scopeinitspec *spec);
 
 PROTECTED int ScopeStack_PopScope(ScopeStackObject *self, scopeinitspec *spec);
+PROTECTED PyObject *ScopeStack_GetVar(ScopeStackObject *self, DeclObject *);
 
 PROTECTED ScopeStackObject *_scopedvar_current_stack;
 
