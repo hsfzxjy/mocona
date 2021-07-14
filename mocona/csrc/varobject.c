@@ -168,6 +168,13 @@ static PyObject *Var_str(VarObject *self) {
     return PyObject_Str(cell->wrapped);
 }
 
+static PyObject *Var_call(VarObject *self, PyObject *args, PyObject *kwds) {
+    ENSURE_VAR_CACHE_UPDATED(self, NULL)
+    DECLARE_CELL(self, cell)
+    ENSURE_NOT_EMPTY(self, NULL)
+    return PyObject_Call(cell->wrapped, args, kwds);
+}
+
 static PyObject *Var_add(PyObject *o1, PyObject *o2) {
     BINARY_FUNC_BEGIN
     return PyNumber_Add(o1, o2);
@@ -822,6 +829,7 @@ PyTypeObject VarObject_Type = {
     .tp_as_mapping = &Var_as_mapping,
     .tp_hash = (hashfunc)Var_hash,
     .tp_str = (unaryfunc)Var_str,
+    .tp_call = (ternaryfunc)Var_call,
     .tp_getattro = (getattrofunc)Var_getattro,
     .tp_setattro = (setattrofunc)Var_setattro,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
