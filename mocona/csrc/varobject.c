@@ -538,14 +538,6 @@ static PyObject *Var_complex(VarObject *self, PyObject *args) {
         (PyObject *)&PyComplex_Type, cell->wrapped, NULL);
 }
 
-static PyObject *
-Var_mro_entries(VarObject *self, PyObject *args, PyObject *kwds) {
-    ENSURE_VAR_CACHE_UPDATED(self, NULL)
-    DECLARE_CELL(self, cell)
-    ENSURE_NOT_EMPTY(self, NULL)
-    return Py_BuildValue("(O)", cell->wrapped);
-}
-
 static PyObject *Var_get_name(VarObject *self) {
     ENSURE_VAR_CACHE_UPDATED(self, NULL)
     DECLARE_CELL(self, cell)
@@ -802,12 +794,6 @@ static PyMethodDef Var_methods[] = {
     {"__reversed__", (PyCFunction)Var_reversed, METH_NOARGS, 0},
     {"__round__", (PyCFunction)Var_round, METH_NOARGS, 0},
     {"__complex__", (PyCFunction)Var_complex, METH_NOARGS, 0},
-#if PY_MAJOR_VERSION > 3 || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 7)
-    {"__mro_entries__",
-     (PyCFunction)Var_mro_entries,
-     METH_VARARGS | METH_KEYWORDS,
-     0},
-#endif
     {NULL, NULL},
 };
 
