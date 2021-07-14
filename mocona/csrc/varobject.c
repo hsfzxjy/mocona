@@ -106,7 +106,6 @@ static PyObject *Var_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         return NULL;
 
     self->cell = NULL;
-    self->dict = NULL;
     self->weakreflist = NULL;
     self->mutable = 0;
 
@@ -848,7 +847,6 @@ PyTypeObject VarObject_Type = {
     .tp_iter = (getiterfunc)Var_iter,
     .tp_methods = Var_methods,
     .tp_getset = Var_getset,
-    .tp_dictoffset = offsetof(VarObject, dict),
     .tp_alloc = PyType_GenericAlloc,
     .tp_new = Var_new,
     .tp_free = PyObject_GC_Del,

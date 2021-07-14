@@ -15,7 +15,6 @@ typedef struct {
     PyObject_HEAD;
 
     unsigned char mutable;
-    PyObject *  dict;
     CellObject *cell;
     PyObject *  weakreflist;
 
