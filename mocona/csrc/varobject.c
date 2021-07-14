@@ -273,7 +273,6 @@ static PyObject *Var_float(VarObject *self) {
 }
 
 static PyObject *Var_inplace_add(VarObject *self, PyObject *other) {
-    ENSURE_VAR_CACHE_UPDATED(self, NULL)
     INPLACE_BINARY_FUNC_BEGIN
     object = PyNumber_InPlaceAdd(cell->wrapped, other);
     INPLACE_BINARY_FUNC_END
