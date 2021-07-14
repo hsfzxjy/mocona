@@ -4,6 +4,8 @@
 #include "common.h"
 
 #include "_ctxmgr.h"
+#include "_s.h"
+#include "_v.h"
 #include "cellobject.h"
 #include "declobject.h"
 #include "scopeobject.h"

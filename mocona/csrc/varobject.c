@@ -2,8 +2,34 @@
 
 PyTypeObject VarObject_Type;
 
+static inline CellObject *_Var_GetTrueCell(VarObject *self);
+static inline int         _Var_SetCell(VarObject *self, CellObject *cell);
+
 #define DECLARE_CELL(SELF, NAME)                                               \
-    CellObject *NAME = Var_GetTrueCell(Var_CAST(SELF));
+    CellObject *NAME = _Var_GetTrueCell(Var_CAST(SELF));
+
+#define ENSURE_VAR_CACHE_UPDATED(SELF, ERRVAL)                                 \
+    do {                                                                       \
+        CellObject *      cell = NULL;                                         \
+        PyThreadState *   ts = NULL;                                           \
+        ScopeStackObject *stack = Var_CAST(SELF)->stack;                       \
+        if (Var_CAST(SELF)->cached_stack_ver == stack->stack_ver) {            \
+            ts = PyThreadState_Get();                                          \
+            if (Var_CAST(SELF)->cached_tsid == ts->id &&                       \
+                Var_CAST(SELF)->cached_tsver == ts->context_ver)               \
+                break;                                                         \
+        }                                                                      \
+        cell = ScopeStack_FindCell(stack, (PyObject *)Var_CAST(SELF)->decl);   \
+        if (!cell) {                                                           \
+            return (ERRVAL);                                                   \
+        }                                                                      \
+        _Var_SetCell(Var_CAST(SELF), cell);                                    \
+        Var_CAST(SELF)->cached_stack_ver = stack->stack_ver;                   \
+        if (ts) {                                                              \
+            Var_CAST(SELF)->cached_tsid = ts->id;                              \
+            Var_CAST(SELF)->cached_tsver = ts->context_ver;                    \
+        }                                                                      \
+    } while (0);
 
 #define ENSURE_MUTABLE(SELF, ERRVAL)                                           \
     do {                                                                       \
@@ -828,6 +854,21 @@ PyTypeObject VarObject_Type = {
     .tp_free = PyObject_GC_Del,
 };
 
+static inline CellObject *_Var_GetTrueCell(VarObject *self) {
+    CellObject *cell = self->cell;
+    while (cell->prev)
+        cell = cell->prev;
+    return cell;
+}
+
+static inline int _Var_SetCell(VarObject *self, CellObject *cell) {
+    if (cell == self->cell)
+        return 0;
+    Py_INCREF(cell);
+    Py_XSETREF(self->cell, cell);
+    return 0;
+}
+
 VarObject *Var_New(ScopeStackObject *stack, DeclObject *decl) {
     VarObject *self = NEW_OBJECT(VarObject);
     if (!self)
@@ -840,11 +881,19 @@ VarObject *Var_New(ScopeStackObject *stack, DeclObject *decl) {
     return self;
 }
 
-int *Var_SetCell(VarObject *self, CellObject *cell) {
-    if (cell == self->cell)
-        return 0;
-    Py_INCREF(cell);
-    Py_XSETREF(self->cell, cell);
-    self->dict = cell->dict;
+int Var_Assign(VarObject *self, PyObject *rhs) {
+    if (!self->mutable) {
+        PyErr_SetString(PyExc_RuntimeError, "var is immutable");
+        return -1;
+    }
+    ENSURE_VAR_CACHE_UPDATED(self, -1)
+    if (Py_TYPE(rhs) == &VarObject_Type) {
+        ENSURE_VAR_CACHE_UPDATED(rhs, -1)
+        DECLARE_CELL(rhs, rhs_cell)
+        _ENSURE_NOT_EMPTY(rhs, -1, rhs_cell)
+        rhs = rhs_cell->wrapped;
+    }
+    if (Cell_Assign(self->cell, rhs) < 0)
+        return -1;
     return 0;
 }
