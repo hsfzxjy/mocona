@@ -82,7 +82,7 @@ static inline int         _Var_SetCell(VarObject *self, CellObject *cell);
         ENSURE_VAR_CACHE_UPDATED(other, NULL)                                  \
         DECLARE_CELL(other, cell_other)                                        \
         _ENSURE_NOT_EMPTY(other, NULL, cell_other)                             \
-        other = cell->wrapped;                                                 \
+        other = cell_other->wrapped;                                           \
     }
 
 #define INPLACE_BINARY_FUNC_END                                                \
