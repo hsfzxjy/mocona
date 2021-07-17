@@ -3,7 +3,7 @@ import operator
 
 class _Dummy:
     def __init__(self, value):
-        self.value = value if isinstance(value, tuple) else (value, )
+        self.value = value if isinstance(value, tuple) else (value,)
         self.immutable = True
 
     def _build_value(self, *args):
@@ -22,12 +22,32 @@ class _Dummy:
 
         return _func
 
-    for funcname in ("__add__", "__sub__", "__mul__", "__mod__", "__divmod__",
-                     "__pow__", "__neg__", "__pos__", "__abs__", "__invert__",
-                     "__lshift__", "__rshift__", "__and__", "__xor__", "__or__",
-                     "__floordiv__", "__truediv__", "__matmul__",
-                     "__contains__", "__getitem__", "__setitem__",
-                     "__delitem__", "__reversed__", "__round__"):
+    for funcname in (
+        "__add__",
+        "__sub__",
+        "__mul__",
+        "__mod__",
+        "__divmod__",
+        "__pow__",
+        "__neg__",
+        "__pos__",
+        "__abs__",
+        "__invert__",
+        "__lshift__",
+        "__rshift__",
+        "__and__",
+        "__xor__",
+        "__or__",
+        "__floordiv__",
+        "__truediv__",
+        "__matmul__",
+        "__contains__",
+        "__getitem__",
+        "__setitem__",
+        "__delitem__",
+        "__reversed__",
+        "__round__",
+    ):
         locals()[funcname] = _make_func(funcname)
 
     def _make_func(name):
@@ -42,14 +62,27 @@ class _Dummy:
 
         return _func
 
-    for funcname in ("__iadd__", "__isub__", "__imul__", "__imod__", "__ipow__",
-                     "__ilshift__", "__irshift__", "__iand__", "__ixor__",
-                     "__ior__", "__ifloordiv__", "__itruediv__", "__imatmul__"):
+    for funcname in (
+        "__iadd__",
+        "__isub__",
+        "__imul__",
+        "__imod__",
+        "__ipow__",
+        "__ilshift__",
+        "__irshift__",
+        "__iand__",
+        "__ixor__",
+        "__ior__",
+        "__ifloordiv__",
+        "__itruediv__",
+        "__imatmul__",
+    ):
         locals()[funcname] = _make_func(funcname)
 
     def _make_func(name):
         def _func(self, other):
-            if not isinstance(other, _Dummy): return False
+            if not isinstance(other, _Dummy):
+                return False
             return getattr(operator, name)(self.value, other.value)
 
         return _func
