@@ -36,8 +36,9 @@ ScopeStack_traverse(ScopeStackObject *self, visitproc visit, void *arg) {
 static int ScopeStack_clear(ScopeStackObject *self) {
     ScopeObject *scope = self->top_global_scope;
     while (scope) {
+        ScopeObject *prev = scope->f_prev;
         Py_CLEAR(scope);
-        scope = scope->f_prev;
+        scope = prev;
     }
     Py_CLEAR(self->ctxvar_scope);
 
