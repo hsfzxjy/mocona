@@ -26,6 +26,7 @@ static PyObject *Scope_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self->cells = NULL;
     self->lock = NULL;
     self->attr = 0;
+    self->f_refcnt = 0;
     self->f_prev = NULL;
 
     return (PyObject *)self;
@@ -101,6 +102,7 @@ Scope_New(scopeinitspec *spec, ScopeObject *prev, PyObject *context) {
 
     Py_XINCREF(prev);
     self->f_prev = prev;
+    SCOPE_XINCREF(prev);
 
     if (spec->is_bottom || !prev) {
         if (!(self->cells = _PyHamt_New()))

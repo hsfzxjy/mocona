@@ -166,6 +166,7 @@ static inline int ScopeStack_PopGlobalScope(ScopeStackObject *self) {
     ScopeObject *prev = self->top_global_scope->f_prev;
     Py_INCREF(prev);
     Py_DECREF(self->top_global_scope);
+    SCOPE_XDECREF(prev);
     self->top_global_scope = prev;
 
     self->stack_ver++;
@@ -233,7 +234,7 @@ static inline int ScopeStack_PopLocalScope(ScopeStackObject *self) {
         goto except;
     }
     Py_DECREF(cur_scope);
-    if (cur_scope->ob_base.ob_refcnt > 2) {
+    if (SCOPE_HAS_NEXT(cur_scope)) {
         PyErr_SetString(
             PyExc_RuntimeError, "current local scope has external references");
         goto except;
@@ -248,7 +249,7 @@ static inline int ScopeStack_PopLocalScope(ScopeStackObject *self) {
             goto except;
         Py_DECREF(tok);
     }
-    Py_DECREF(cur_scope->pycontext);
+    SCOPE_XDECREF(cur_scope->f_prev);
     Py_DECREF(cur_scope);
 
     return 0;

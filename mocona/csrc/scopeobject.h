@@ -12,17 +12,27 @@ typedef struct {
     int       container_type;
 } scopeinitspec;
 
+#define Scope_CAST(OP) ((ScopeObject *)(OP))
+
 #define SCOPE_ATTR_IS_GLOBAL ((1UL << 1))
 #define SCOPE_ATTR_IS_BOTTOM ((1UL << 2))
 #define SCOPE_ATTR_IS_TRANSPARENT ((1UL << 3))
 #define SCOPE_HAS_ATTR(SELF, NAME)                                             \
     ((((ScopeObject *)SELF)->attr & SCOPE_ATTR_##NAME) != 0)
 
-// global scope has next iif refcnt >= 2
-// local scope has next iif refcnt >= 3
-#define SCOPE_HAS_NEXT(SELF)                                                   \
-    (((ScopeObject *)(SELF))->ob_base.ob_refcnt >=                             \
-     (Py_ssize_t)(3 - SCOPE_HAS_ATTR(SELF, IS_GLOBAL)))
+#define SCOPE_HAS_NEXT(SELF) (Scope_CAST(SELF)->f_refcnt > 0)
+#define SCOPE_XINCREF(OP)                                                      \
+    do {                                                                       \
+        if (OP) {                                                              \
+            Scope_CAST(OP)->f_refcnt++;                                        \
+        }                                                                      \
+    } while (0)
+#define SCOPE_XDECREF(OP)                                                      \
+    do {                                                                       \
+        if (OP) {                                                              \
+            Scope_CAST(OP)->f_refcnt--;                                        \
+        }                                                                      \
+    } while (0)
 
 PROTECTED PyTypeObject ScopeObject_Type;
 
@@ -30,6 +40,7 @@ typedef struct _ScopeObject {
     PyObject_HEAD;
 
     unsigned long attr;
+    uint64_t      f_refcnt;
 
     struct _ScopeObject *f_prev;
     PyHamtObject *       cells;
