@@ -888,3 +888,9 @@ int Var_Assign(VarObject *self, PyObject *rhs) {
         return -1;
     return 0;
 }
+
+int Var_IsEmpty(VarObject *self) {
+    ENSURE_VAR_CACHE_UPDATED(self, -1)
+    DECLARE_CELL(self, cell)
+    return cell->wrapped == NULL ? 1 : 0;
+}

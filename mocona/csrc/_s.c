@@ -65,12 +65,29 @@ static PyObject *_S_isvar(PyObject *self, PyObject *arg) {
         Py_RETURN_FALSE;
 }
 
+static PyObject *_S_isempty(PyObject *self, PyObject *arg) {
+    if (Py_TYPE(arg) != &VarObject_Type) {
+        PyErr_SetString(PyExc_RuntimeError, "expect a Var");
+        return NULL;
+    }
+    switch (Var_IsEmpty(Var_CAST(arg))) {
+    case 0:
+        Py_RETURN_FALSE;
+    case 1:
+        Py_RETURN_TRUE;
+    case -1:
+    default:
+        return NULL;
+    }
+}
+
 #define DECLARE_SCOPE_FUNCTION_ENTRY(NAME)                                     \
     { #NAME, (PyCFunction)_S_##NAME, METH_VARARGS, 0 }
 
 static PyMethodDef methods[] = {
     {"assign", (PyCFunction)_S_assign, METH_FASTCALL, 0},
     {"isvar", (PyCFunction)_S_isvar, METH_O, 0},
+    {"isempty", (PyCFunction)_S_isempty, METH_O, 0},
     {"_varfor", (PyCFunction)_S__varfor, METH_O, 0},
     DECLARE_SCOPE_FUNCTION_ENTRY(patch),
     DECLARE_SCOPE_FUNCTION_ENTRY(patch_local),
