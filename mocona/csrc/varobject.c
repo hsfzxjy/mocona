@@ -144,14 +144,17 @@ static void Var_dealloc(VarObject *self) {
 static PyObject *Var_repr(VarObject *self) {
     ENSURE_VAR_CACHE_UPDATED(self, NULL)
     DECLARE_CELL(self, cell)
-    ENSURE_NOT_EMPTY(self, NULL)
 
-    return PyUnicode_FromFormat(
-        "<%s at %p for %s at %p>",
-        Py_TYPE(self)->tp_name,
-        self,
-        Py_TYPE(cell->wrapped)->tp_name,
-        cell->wrapped);
+    if (cell && cell->wrapped)
+        return PyUnicode_FromFormat(
+            "<%s at %p for %s at %p>",
+            Py_TYPE(self)->tp_name,
+            self,
+            Py_TYPE(cell->wrapped)->tp_name,
+            cell->wrapped);
+    else
+        return PyUnicode_FromFormat(
+            "<%s at %p: empty>", Py_TYPE(self)->tp_name, self);
 }
 
 static Py_hash_t Var_hash(VarObject *self) {
@@ -164,8 +167,10 @@ static Py_hash_t Var_hash(VarObject *self) {
 static PyObject *Var_str(VarObject *self) {
     ENSURE_VAR_CACHE_UPDATED(self, NULL)
     DECLARE_CELL(self, cell)
-    ENSURE_NOT_EMPTY(self, NULL)
-    return PyObject_Str(cell->wrapped);
+    if (cell->wrapped)
+        return PyObject_Str(cell->wrapped);
+    else
+        return Var_repr(self);
 }
 
 static PyObject *Var_call(VarObject *self, PyObject *args, PyObject *kwds) {
