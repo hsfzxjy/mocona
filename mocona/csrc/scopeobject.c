@@ -235,6 +235,7 @@ _Scope_AddCells(ScopeObject *self, PyObject *container, iteritemsproc getter) {
         new_cells = _PyHamt_Assoc(cells, decl, cell);
         if (!new_cells)
             goto except;
+        Py_DECREF(cell);
 
         Py_SETREF(cells, new_cells);
     }
@@ -248,7 +249,9 @@ except:
     RELEASE_LOCK
     return -1;
 done:
-    if (self->cells != cells)
+    if (self->cells == cells)
+        Py_DECREF(cells);
+    else
         Py_XSETREF(self->cells, cells);
     RELEASE_LOCK
     return 0;
