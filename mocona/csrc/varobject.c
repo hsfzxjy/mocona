@@ -158,10 +158,7 @@ static PyObject *Var_repr(VarObject *self) {
 }
 
 static Py_hash_t Var_hash(VarObject *self) {
-    ENSURE_VAR_CACHE_UPDATED(self, -1)
-    DECLARE_CELL(self, cell)
-    ENSURE_NOT_EMPTY(self, -1)
-    return PyObject_Hash(cell->wrapped);
+    return PyObject_Hash((PyObject *)self->decl);
 }
 
 static PyObject *Var_str(VarObject *self) {
