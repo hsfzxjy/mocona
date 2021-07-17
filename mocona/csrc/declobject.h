@@ -16,4 +16,8 @@ typedef struct {
 #define DECL_FLAGS_MUTABLE (1UL << 1)
 #define DECL_FLAGS_SYNCHRONIZED (1UL << 2)
 
+#include "_trace_refcnt.h"
+
+DEFINE_REFCNT_TRACE_FOR(DECL)
+
 #endif

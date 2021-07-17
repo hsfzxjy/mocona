@@ -1,10 +1,40 @@
 #include "_scopedvar_module.h"
 
+#ifdef TRACE_REFCNT
+#define _RETURN_LONG(x) return PyLong_FromUnsignedLongLong(x);
+#define TR_MATCH_UNICODE_RETURN_LONG(NAME) TR_MATCH_UNICODE(NAME, _RETURN_LONG)
+static PyObject *_scopedvar_get_refcnt_stats(PyObject *mod, PyObject *str) {
+    TR_MATCH_UNICODE_RETURN_LONG(CELL)
+    TR_MATCH_UNICODE_RETURN_LONG(DECL)
+    TR_MATCH_UNICODE_RETURN_LONG(SCOPE)
+    return NULL;
+}
+
+static PyObject *_scopedvar_reset_refcnt_stats(PyObject *mod) {
+    CELL_TRACE_RESET();
+    DECL_TRACE_RESET();
+    SCOPE_TRACE_RESET();
+    Py_RETURN_NONE;
+}
+#endif
+
+static PyMethodDef methods[] = {
+#ifdef TRACE_REFCNT
+    {"get_refcnt_stats", (PyCFunction)_scopedvar_get_refcnt_stats, METH_O, 0},
+    {"reset_refcnt_stats",
+     (PyCFunction)_scopedvar_reset_refcnt_stats,
+     METH_NOARGS,
+     0},
+#endif
+    {NULL},
+};
+
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
     .m_name = "_scopedvar",
     .m_doc = "",
     .m_size = -1,
+    .m_methods = methods,
 };
 
 #define ADD_OBJECT(NAME, O)                                                    \

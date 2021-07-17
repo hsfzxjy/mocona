@@ -1,5 +1,7 @@
 #include "_scopedvar_module.h"
 
+TRACE_REFCNT_INIT(DECL)
+
 static PyObject *Decl_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     DeclObject *self;
     self = (DeclObject *)type->tp_alloc(type, 0);
@@ -16,6 +18,7 @@ static PyObject *Decl_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self->dotted_name = NULL;
     self->flags = 0;
 
+    DECL_TRACE_INC(TR_ALLOCATED);
     return (PyObject *)self;
 }
 
@@ -59,6 +62,7 @@ static void Decl_dealloc(DeclObject *self) {
     Decl_clear(self);
 
     Py_TYPE(self)->tp_free(self);
+    DECL_TRACE_INC(TR_FREED);
 }
 
 #define DECL_FLAG_STR(NAME, STR)                                               \

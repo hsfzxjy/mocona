@@ -16,4 +16,8 @@ typedef struct _CellObject {
 PROTECTED int Cell_Assign(CellObject *self, PyObject *wrapped);
 PROTECTED CellObject *Cell_New();
 
+#include "_trace_refcnt.h"
+
+DEFINE_REFCNT_TRACE_FOR(CELL)
+
 #endif

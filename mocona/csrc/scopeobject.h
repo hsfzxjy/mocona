@@ -59,4 +59,8 @@ PROTECTED int Scope_AddCells(ScopeObject *self, scopeinitspec *spec);
 
 PROTECTED CellObject *Scope_FindCell(ScopeObject *self, PyObject *decl);
 
+#include "_trace_refcnt.h"
+
+DEFINE_REFCNT_TRACE_FOR(SCOPE)
+
 #endif

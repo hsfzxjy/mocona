@@ -1,5 +1,7 @@
 #include "_scopedvar_module.h"
 
+TRACE_REFCNT_INIT(SCOPE)
+
 #define ACQUIRE_LOCK                                                           \
     if (SCOPE_HAS_ATTR(self, IS_GLOBAL) &&                                     \
         !PyThread_acquire_lock(self->lock, NOWAIT_LOCK)) {                     \
@@ -29,6 +31,7 @@ static PyObject *Scope_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self->f_refcnt = 0;
     self->f_prev = NULL;
 
+    SCOPE_TRACE_INC(TR_ALLOCATED);
     return (PyObject *)self;
 }
 
@@ -57,6 +60,7 @@ static void Scope_dealloc(ScopeObject *self) {
     Scope_clear(self);
 
     Py_TYPE(self)->tp_free(self);
+    SCOPE_TRACE_INC(TR_FREED);
 }
 
 PyTypeObject ScopeObject_Type = {

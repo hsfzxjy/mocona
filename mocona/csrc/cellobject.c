@@ -1,5 +1,7 @@
 #include "_scopedvar_module.h"
 
+TRACE_REFCNT_INIT(CELL)
+
 static PyObject *Cell_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CellObject *self;
     self = (CellObject *)type->tp_alloc(type, 0);
@@ -11,6 +13,7 @@ static PyObject *Cell_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self->wrapped = NULL;
     self->prev = NULL;
 
+    CELL_TRACE_INC(TR_ALLOCATED);
     return (PyObject *)self;
 }
 
@@ -36,6 +39,7 @@ static void Cell_dealloc(CellObject *self) {
     Cell_clear(self);
 
     Py_TYPE(self)->tp_free(self);
+    CELL_TRACE_INC(TR_FREED);
 }
 
 static PyObject *Cell_repr(CellObject *self) {
