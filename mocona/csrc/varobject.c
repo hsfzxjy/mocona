@@ -120,12 +120,14 @@ static PyObject *Var_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 
 static int Var_traverse(VarObject *self, visitproc visit, void *arg) {
     Py_VISIT(self->cell);
+    Py_VISIT(self->decl);
 
     return 0;
 }
 
 static int Var_clear(VarObject *self) {
     Py_CLEAR(self->cell);
+    Py_CLEAR(self->decl);
 
     return 0;
 }
