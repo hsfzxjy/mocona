@@ -14,7 +14,7 @@ ScopeStack_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         .is_bottom = 1,
         .is_transparent = 0,
     };
-    self->top_global_scope = Scope_New(&spec, NULL, NULL);
+    self->top_global_scope = Scope_New(&spec, NULL);
     self->ctxvar_scope = PyContextVar_New("Scope", NULL);
     self->stack_ver = 1;
 
@@ -132,7 +132,7 @@ ScopeStack_PushGlobalScope(ScopeStackObject *self, scopeinitspec *spec) {
             "global scope cannot be added when any local scope exists");
         goto except;
     }
-    new_scope = Scope_New(spec, self->top_global_scope, NULL);
+    new_scope = Scope_New(spec, self->top_global_scope);
     if (!new_scope)
         goto except;
 
@@ -181,7 +181,6 @@ ScopeStack_PushLocalScope(ScopeStackObject *self, scopeinitspec *spec) {
 
     PyObject *   new_ctx = NULL;
     ScopeObject *new_scope = NULL, *prev_scope = NULL;
-    int          entered = 0;
 
     if (PyContextVar_Get(self->ctxvar_scope, NULL, (PyObject **)&prev_scope) <
         0)
@@ -193,33 +192,20 @@ ScopeStack_PushLocalScope(ScopeStackObject *self, scopeinitspec *spec) {
         Py_DECREF(prev_scope);
     }
 
-    new_ctx = PyContext_CopyCurrent();
-    if (!new_ctx)
-        goto except;
-
-    new_scope = Scope_New(spec, prev_scope, new_ctx);
+    new_scope = Scope_New(spec, prev_scope);
     if (!new_scope)
         goto except;
 
     if (Scope_AddCells(new_scope, spec) < 0)
         goto except;
 
-    if (PyContext_Enter(new_ctx) < 0)
-        goto except;
-    entered = 1;
-
     PyObject *tok = PyContextVar_Set(self->ctxvar_scope, (PyObject *)new_scope);
     if (!tok)
         goto except;
-    Py_DECREF(tok);
-
+    new_scope->token = tok;
+    self->stack_ver++;
     return 0;
 except:
-    if (entered) {
-        PyContext_Exit(new_ctx);
-        // no need to reset
-        // Py_XDECREF(PyContextVar_Set(self->ctxvar_scope, prev_scope));
-    }
     Py_XDECREF(new_scope);
     Py_XDECREF(new_ctx);
 
@@ -240,19 +226,15 @@ static inline int ScopeStack_PopLocalScope(ScopeStackObject *self) {
             PyExc_RuntimeError, "current local scope has external references");
         goto except;
     }
-    if (PyContext_Exit(cur_scope->pycontext) < 0)
-        goto except;
 
-    if (!SCOPE_HAS_ATTR(cur_scope->f_prev, IS_GLOBAL)) {
-        PyObject *tok =
-            PyContextVar_Set(self->ctxvar_scope, (PyObject *)cur_scope->f_prev);
-        if (!tok)
+    if (cur_scope->token) {
+        if (PyContextVar_Reset(self->ctxvar_scope, cur_scope->token) < 0)
             goto except;
-        Py_DECREF(tok);
+        Py_SETREF(cur_scope->token, NULL);
     }
     SCOPE_XDECREF(cur_scope->f_prev);
     Py_DECREF(cur_scope);
-
+    self->stack_ver++;
     return 0;
 except:
     return -1;

@@ -46,12 +46,11 @@ typedef struct _ScopeObject {
     PyHamtObject *       cells;
     union {
         PyThread_type_lock lock;
-        PyObject *         pycontext;
+        PyObject *         token;
     };
 } ScopeObject;
 
-PROTECTED ScopeObject *
-          Scope_New(scopeinitspec *spec, ScopeObject *prev, PyObject *context);
+PROTECTED ScopeObject *Scope_New(scopeinitspec *spec, ScopeObject *prev);
 
 #define ADD_CELLS_CONTAINER_TYPE_NONE 0
 #define ADD_CELLS_CONTAINER_TYPE_TUPLE 1

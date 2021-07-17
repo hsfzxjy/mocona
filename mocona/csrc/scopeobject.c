@@ -74,8 +74,7 @@ PyTypeObject ScopeObject_Type = {
     .tp_free = PyObject_GC_Del,
 };
 
-ScopeObject *
-Scope_New(scopeinitspec *spec, ScopeObject *prev, PyObject *context) {
+ScopeObject *Scope_New(scopeinitspec *spec, ScopeObject *prev) {
     ScopeObject *self = NEW_OBJECT(ScopeObject);
 
     if (!self)
@@ -97,7 +96,6 @@ Scope_New(scopeinitspec *spec, ScopeObject *prev, PyObject *context) {
         }
     } else {
         assert(prev != NULL);
-        self->pycontext = context;
     }
 
     Py_XINCREF(prev);
