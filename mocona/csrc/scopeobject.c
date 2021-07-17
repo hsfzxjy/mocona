@@ -208,6 +208,15 @@ _Scope_AddCells(ScopeObject *self, PyObject *container, iteritemsproc getter) {
     Py_INCREF(cells);
 
     while (getter(container, &pos, &decl, &value)) {
+        if (Py_TYPE(decl) == &VarObject_Type) {
+            decl = (PyObject *)Var_CAST(decl)->decl;
+        } else if (Py_TYPE(decl) != &DeclObject_Type) {
+            PyErr_Format(
+                PyExc_TypeError,
+                "expect a decl object, got '%s'",
+                decl->ob_type->tp_name);
+            goto except;
+        }
         switch (_PyHamt_Find(cells, decl, &cell)) {
         // case 1:
         //     PyErr_Format(PyExc_KeyError, "key %R exists", decl);
