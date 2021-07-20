@@ -82,6 +82,54 @@ static PyObject *_S_isempty(PyObject *self, PyObject *arg) {
     }
 }
 
+static PyObject *_S_inject(PyObject *self, PyObject *arg) {
+    if (Py_TYPE(arg) != &PyFunction_Type) {
+        PyErr_SetString(PyExc_TypeError, "expect a python function");
+        return NULL;
+    }
+    PyFunctionObject *func = (PyFunctionObject *)arg;
+
+    PyObject *defaults = func->func_defaults;
+    if (defaults) {
+        Py_ssize_t i;
+        for (i = 0; i < PyTuple_GET_SIZE(defaults); ++i) {
+            PyObject *item = PyTuple_GET_ITEM(defaults, i);
+            if (Py_TYPE(item) != &DeclObject_Type)
+                continue;
+            PyObject *var = _S__varfor(self, item);
+            if (!var)
+                goto except;
+            if (PyTuple_SetItem(defaults, i, var) < 0) {
+                Py_DECREF(var);
+                goto except;
+            }
+        }
+    }
+    defaults = func->func_kwdefaults;
+    if (defaults) {
+        Py_ssize_t pos = 0;
+        PyObject * key, *value;
+        while (PyDict_Next(defaults, &pos, &key, &value)) {
+            if (Py_TYPE(value) != &DeclObject_Type)
+                continue;
+            PyObject *var = _S__varfor(self, value);
+            if (!var)
+                goto except;
+            if (PyDict_SetItem(defaults, key, var) < 0) {
+                Py_DECREF(var);
+                goto except;
+            }
+            Py_DECREF(var);
+        }
+    }
+    goto done;
+except:
+    return NULL;
+done:
+    Py_INCREF(func);
+    return (PyObject *)func;
+}
+
 #define DECLARE_SCOPE_FUNCTION_ENTRY(NAME)                                     \
     { #NAME, (PyCFunction)_S_##NAME, METH_VARARGS, 0 }
 
@@ -89,6 +137,7 @@ static PyMethodDef methods[] = {
     {"assign", (PyCFunction)_S_assign, METH_FASTCALL, 0},
     {"isvar", (PyCFunction)_S_isvar, METH_O, 0},
     {"isempty", (PyCFunction)_S_isempty, METH_O, 0},
+    {"inject", (PyCFunction)_S_inject, METH_O, 0},
     {"_varfor", (PyCFunction)_S__varfor, METH_O, 0},
     DECLARE_SCOPE_FUNCTION_ENTRY(patch),
     DECLARE_SCOPE_FUNCTION_ENTRY(patch_local),
