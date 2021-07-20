@@ -44,7 +44,8 @@ _S_assign(PyObject *self, PyObject *const *args, Py_ssize_t nargs) {
     PyObject * rhs = args[1];
     if (Var_Assign(var, rhs) < 0)
         return NULL;
-    Py_RETURN_NONE;
+    Py_INCREF(var);
+    return (PyObject *)var;
 }
 
 static PyObject *_S__varfor(PyObject *self, PyObject *decl) {
