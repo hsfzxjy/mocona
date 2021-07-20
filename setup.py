@@ -1,5 +1,5 @@
 from glob import glob
-from distutils.core import setup, Extension
+from setuptools import setup, Extension, find_packages
 
 _scopedvar_module = Extension(
     "mocona._scopedvar",
@@ -8,8 +8,10 @@ _scopedvar_module = Extension(
 )
 
 setup(
-    name='mocona',
-    version='0.1.0',
-    description='TODO',
+    name="mocona",
+    version="0.1.0",
+    description="TODO",
     ext_modules=[_scopedvar_module],
+    packages=find_packages(".", exclude=("*.so",)),
+    package_data={"mocona": ["py.typed", "*.pyi"]},
 )
