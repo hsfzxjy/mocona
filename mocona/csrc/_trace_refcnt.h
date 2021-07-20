@@ -40,7 +40,7 @@
 #else
 #define DEFINE_REFCNT_TRACE_FOR(NAME)                                          \
     static inline void     NAME##_TRACE_INC(int type_) {}                      \
-    static inline uint64_t NAME##_TRACE_GET(int type_) {}                      \
+    static inline uint64_t NAME##_TRACE_GET(int type_) { return 0; }           \
     static inline void     NAME##_TRACE_RESET() {}
 
 #define TRACE_REFCNT_INIT(NAME)
