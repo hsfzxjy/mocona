@@ -2,7 +2,7 @@ from glob import glob
 from distutils.core import setup, Extension
 
 _scopedvar_module = Extension(
-    '_scopedvar',
+    "mocona._scopedvar",
     sources=glob("mocona/csrc/*.c"),
     extra_compile_args=["-Wno-missing-braces"],
 )

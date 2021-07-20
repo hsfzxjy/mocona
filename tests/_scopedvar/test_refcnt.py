@@ -2,8 +2,8 @@ import gc
 import sys
 import pytest
 
-import _scopedvar
-from _scopedvar import S, V
+from mocona.scopedvar import S, V
+from mocona._scopedvar import get_refcnt_stats, reset_refcnt_stats
 from _dummy import _Dummy
 
 from functools import wraps
@@ -11,7 +11,7 @@ from functools import wraps
 
 class RefCntStats:
     def __getattr__(self, name):
-        return _scopedvar.get_refcnt_stats(name)
+        return get_refcnt_stats(name)
 
     def get_all(self):
         results = {}
@@ -22,7 +22,7 @@ class RefCntStats:
         return results
 
     def reset(self):
-        _scopedvar.reset_refcnt_stats()
+        reset_refcnt_stats()
 
 
 stats = RefCntStats()

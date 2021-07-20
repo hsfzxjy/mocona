@@ -4,7 +4,7 @@ import contextlib
 from itertools import product
 
 import pytest
-from _scopedvar import S, V
+from mocona.scopedvar import S, V
 
 from _dummy import _Dummy
 

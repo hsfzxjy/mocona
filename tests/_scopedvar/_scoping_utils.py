@@ -4,7 +4,7 @@ import threading
 import contextlib
 import inspect
 
-from _scopedvar import S, V
+from mocona.scopedvar import S, V
 
 
 class _Executable:
