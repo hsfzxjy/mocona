@@ -33,7 +33,7 @@ def isolate_testcase(fn):
     @wraps(fn)
     def _inner(*args, **kwargs):
         global A
-        A = S._varfor(V.a["w"])
+        A = S._varfor(V.a)
         with S.isolate():
             gc.collect()
             stats.reset()

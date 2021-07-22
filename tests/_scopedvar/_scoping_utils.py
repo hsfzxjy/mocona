@@ -111,7 +111,7 @@ class Assign(_Executable):
 
 class Var:
     def __init__(self, name):
-        self.var = S._varfor(getattr(V, name)["w"])
+        self.var = S._varfor(getattr(V, name))
 
     def should_be(self, value):
         return ShouldBe(self.var, value)

@@ -16,7 +16,7 @@ static PyObject *Decl_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self->_writer->overallocate = 1;
     self->_writer->min_length = 16;
     self->dotted_name = NULL;
-    self->flags = 0;
+    self->flags = DECL_FLAGS_MUTABLE;
 
     DECL_TRACE_INC(TR_ALLOCATED);
     return (PyObject *)self;
@@ -118,6 +118,7 @@ static PyObject *Decl_getitem(DeclObject *self, PyObject *key) {
     }
     const Py_UCS1 *flag_str = PyUnicode_1BYTE_DATA(key);
     unsigned long  flags = 0;
+    int            mutable_set = 0;
     while (*flag_str) {
         switch (*flag_str) {
         case 's':
@@ -126,10 +127,18 @@ static PyObject *Decl_getitem(DeclObject *self, PyObject *key) {
             flags |= DECL_FLAGS_SYNCHRONIZED;
             break;
         case 'w':
-            if (flags & DECL_FLAGS_MUTABLE)
+            if (mutable_set)
                 goto error;
+            mutable_set = 1;
             flags |= DECL_FLAGS_MUTABLE;
             break;
+        case 'r':
+            if (mutable_set)
+                goto error;
+            mutable_set = 1;
+            flags &= ~DECL_FLAGS_MUTABLE;
+            break;
+
         default:
             goto error;
         }

@@ -40,9 +40,9 @@ def test_tenary_ops(op, enable_preinit):
     a = _Dummy(1)
     b = _Dummy(2)
     c = _Dummy(3)
-    vara = S._varfor(V.a["w"])
-    varb = S._varfor(V.b["w"])
-    varc = S._varfor(V.c["w"])
+    vara = S._varfor(V.a)
+    varb = S._varfor(V.b)
+    varc = S._varfor(V.c)
     with _preinit(enable_preinit, vara, varb, varc):
         with S.isolate():
             S.assign(vara, a)
@@ -84,8 +84,8 @@ binary_ops = [
 def test_binary_ops(op, enable_preinit):
     a = _Dummy(1)
     b = _Dummy(2)
-    vara = S._varfor(V.a["w"])
-    varb = S._varfor(V.b["w"])
+    vara = S._varfor(V.a)
+    varb = S._varfor(V.b)
     with _preinit(enable_preinit, vara, varb):
         with S.isolate():
             S.assign(vara, a)
@@ -119,7 +119,7 @@ def test_unary_ops(op, enable_preinit):
     else:
         default = 1
     a = _Dummy(default)
-    vara = S._varfor(V.a["w"])
+    vara = S._varfor(V.a)
 
     with _preinit(enable_preinit, vara):
         with S.isolate():
@@ -149,8 +149,8 @@ def test_inplace_binary_ops_immutable(op, enable_preinit):
     a = _Dummy(1)
     b = _Dummy(2)
     a.immutable = True
-    vara = S._varfor(V.a["w"])
-    varb = S._varfor(V.b["w"])
+    vara = S._varfor(V.a)
+    varb = S._varfor(V.b)
     with _preinit(enable_preinit, vara, varb):
         with S.isolate():
             S.assign(vara, _Dummy(1))
@@ -167,8 +167,8 @@ def test_inplace_binary_ops_mutable(op, enable_preinit):
     a = _Dummy(1)
     b = _Dummy(2)
     a.immutable = False
-    vara = S._varfor(V.a["w"])
-    varb = S._varfor(V.b["w"])
+    vara = S._varfor(V.a)
+    varb = S._varfor(V.b)
     with _preinit(enable_preinit, vara, varb):
         with S.isolate():
             S.assign(vara, _Dummy(1))
@@ -186,7 +186,7 @@ def test_docstring():
     class _SubDummy(_Dummy):
         "sub dummy"
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _SubDummy)
         assert _SubDummy.__doc__ == var.__doc__
@@ -200,7 +200,7 @@ def test_qualname():
 
     target_name = "test_qualname.<locals>._SubDummy"
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _SubDummy)
         assert var.__qualname__ == target_name
@@ -211,7 +211,7 @@ def test_qualname():
 def test_name():
     import decimal
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, decimal)
         assert var.__name__ == "decimal"
@@ -227,7 +227,7 @@ def test_module():
 
     target_module = _SubDummy.__module__
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _SubDummy)
         assert var.__module__ is target_module
@@ -239,7 +239,7 @@ def test_class():
     class _SubDummy(_Dummy):
         ...
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _SubDummy)
         assert var.__class__ is type
@@ -249,7 +249,7 @@ def test_annotations():
     def _f(a: int) -> float:
         ...
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _f)
         assert var.__annotations__ is _f.__annotations__
@@ -261,7 +261,7 @@ def test_contextmanager():
     lst = []
     obj = _Dummy(lst)
 
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, obj)
         with var:
@@ -274,7 +274,7 @@ def test_contextmanager():
 
 
 def test_mro_entries():
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _Dummy(0))
 
@@ -285,7 +285,7 @@ def test_mro_entries():
 
 
 def test_call():
-    var = S._varfor(V.a["w"])
+    var = S._varfor(V.a)
     with S.isolate():
         S.assign(var, _Dummy)
         assert var(0) == _Dummy(0)
