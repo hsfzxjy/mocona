@@ -124,12 +124,12 @@ ScopeStack_EnterGlobalScope(ScopeStackObject *self, scopeinitspec *spec) {
 
     ScopeObject *new_scope = NULL;
 
-    ENSURE_MAIN_THREAD("global scope cannot be added in child thread")
+    ENSURE_MAIN_THREAD("cannot enter a global scope outside the main thread")
 
     if (self->top_global_scope && SCOPE_HAS_NEXT(self->top_global_scope)) {
         PyErr_SetString(
             PyExc_RuntimeError,
-            "global scope cannot be added when any local scope exists");
+            "cannot enter a global scope with more than one local scope alive");
         goto except;
     }
     new_scope = Scope_New(spec, self->top_global_scope);
@@ -148,20 +148,20 @@ except:
 }
 
 static inline int ScopeStack_ExitGlobalScope(ScopeStackObject *self) {
-    ENSURE_MAIN_THREAD("top global scope cannot be popped in child thread")
+    ENSURE_MAIN_THREAD("cannot exit a global scope outside the main thread")
     if (!self->top_global_scope) {
-        PyErr_SetString(PyExc_RuntimeError, "scope stack empty");
+        PyErr_SetString(PyExc_RuntimeError, "no global scope to exit");
         goto except;
     }
     if (!self->top_global_scope->f_prev) {
         PyErr_SetString(
-            PyExc_RuntimeError, "bottom-most scope cannot be popped");
+            PyExc_RuntimeError, "cannot exit the outermost global scope");
         goto except;
     }
     if (SCOPE_HAS_NEXT(self->top_global_scope)) {
         PyErr_SetString(
             PyExc_RuntimeError,
-            "global scope cannot be popped when any local scope exists");
+            "cannot exit a global scope with more than one local scope alive");
         goto except;
     }
     ScopeObject *prev = self->top_global_scope->f_prev;
@@ -217,13 +217,16 @@ static inline int ScopeStack_ExitLocalScope(ScopeStackObject *self) {
     if (PyContextVar_Get(self->ctxvar_scope, NULL, (PyObject **)&cur_scope) < 0)
         goto except;
     if (!cur_scope) {
-        PyErr_SetString(PyExc_RuntimeError, "no local scope to pop");
+        PyErr_SetString(PyExc_RuntimeError, "no local scope to exit");
         goto except;
     }
     Py_DECREF(cur_scope);
     if (SCOPE_HAS_NEXT(cur_scope)) {
-        PyErr_SetString(
-            PyExc_RuntimeError, "current local scope has external references");
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "cannot exit a local scope with more than one subsequent scope "
+            "alive. Number of subsequent scopes: %lu",
+            cur_scope->f_refcnt);
         goto except;
     }
 
