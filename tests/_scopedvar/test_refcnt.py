@@ -15,11 +15,16 @@ class RefCntStats:
 
     def get_all(self):
         results = {}
-        for name in "CELL DECL SCOPE".split():
+        for name in "CELL DECL SCOPE NAMESPACE".split():
             for type_ in "ALLOCATED FREED".split():
                 key = f"{name}_{type_}"
                 results[key] = getattr(self, key)
         return results
+
+    def check(self, **kwargs):
+        counts = self.get_all()
+        for key, value in kwargs.items():
+            assert counts[key + "_ALLOCATED"] == counts[key + "_FREED"] == value
 
     def reset(self):
         reset_refcnt_stats()
