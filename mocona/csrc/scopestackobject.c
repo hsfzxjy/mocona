@@ -120,7 +120,7 @@ done:
     } while (0);
 
 static inline int
-ScopeStack_PushGlobalScope(ScopeStackObject *self, scopeinitspec *spec) {
+ScopeStack_EnterGlobalScope(ScopeStackObject *self, scopeinitspec *spec) {
 
     ScopeObject *new_scope = NULL;
 
@@ -147,7 +147,7 @@ except:
     return -1;
 }
 
-static inline int ScopeStack_PopGlobalScope(ScopeStackObject *self) {
+static inline int ScopeStack_ExitGlobalScope(ScopeStackObject *self) {
     ENSURE_MAIN_THREAD("top global scope cannot be popped in child thread")
     if (!self->top_global_scope) {
         PyErr_SetString(PyExc_RuntimeError, "scope stack empty");
@@ -177,7 +177,7 @@ except:
 }
 
 static inline int
-ScopeStack_PushLocalScope(ScopeStackObject *self, scopeinitspec *spec) {
+ScopeStack_EnterLocalScope(ScopeStackObject *self, scopeinitspec *spec) {
 
     PyObject *   new_ctx = NULL;
     ScopeObject *new_scope = NULL, *prev_scope = NULL;
@@ -212,7 +212,7 @@ except:
     return -1;
 }
 
-static inline int ScopeStack_PopLocalScope(ScopeStackObject *self) {
+static inline int ScopeStack_ExitLocalScope(ScopeStackObject *self) {
     ScopeObject *cur_scope = NULL;
     if (PyContextVar_Get(self->ctxvar_scope, NULL, (PyObject **)&cur_scope) < 0)
         goto except;
@@ -240,23 +240,23 @@ except:
     return -1;
 }
 
-int ScopeStack_PushScope(ScopeStackObject *self, scopeinitspec *spec) {
+int ScopeStack_EnterScope(ScopeStackObject *self, scopeinitspec *spec) {
     switch (spec->is_global) {
     case 0:
-        return ScopeStack_PushLocalScope(self, spec);
+        return ScopeStack_EnterLocalScope(self, spec);
     case 1:
-        return ScopeStack_PushGlobalScope(self, spec);
+        return ScopeStack_EnterGlobalScope(self, spec);
     default:
         return -1;
     }
 }
 
-int ScopeStack_PopScope(ScopeStackObject *self, scopeinitspec *spec) {
+int ScopeStack_ExitScope(ScopeStackObject *self, scopeinitspec *spec) {
     switch (spec->is_global) {
     case 0:
-        return ScopeStack_PopLocalScope(self);
+        return ScopeStack_ExitLocalScope(self);
     case 1:
-        return ScopeStack_PopGlobalScope(self);
+        return ScopeStack_ExitGlobalScope(self);
     default:
         return -1;
     }

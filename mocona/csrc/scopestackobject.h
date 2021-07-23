@@ -18,9 +18,10 @@ typedef struct {
 PROTECTED CellObject *
           ScopeStack_FindCell(ScopeStackObject *self, PyObject *decl);
 
-PROTECTED int ScopeStack_PushScope(ScopeStackObject *self, scopeinitspec *spec);
+PROTECTED int
+ScopeStack_EnterScope(ScopeStackObject *self, scopeinitspec *spec);
 
-PROTECTED int ScopeStack_PopScope(ScopeStackObject *self, scopeinitspec *spec);
+PROTECTED int ScopeStack_ExitScope(ScopeStackObject *self, scopeinitspec *spec);
 PROTECTED PyObject *ScopeStack_GetVar(ScopeStackObject *self, DeclObject *);
 
 PROTECTED ScopeStackObject *_scopedvar_current_stack;

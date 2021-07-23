@@ -32,7 +32,7 @@ static void _ctxmgr_dealloc(_ctxmgr *self) {
 }
 
 static PyObject *_ctxmgr_enter(_ctxmgr *self, PyObject *args, PyObject *kwds) {
-    if (ScopeStack_PushScope(_scopedvar_current_stack, &(self->spec)) != 0) {
+    if (ScopeStack_EnterScope(_scopedvar_current_stack, &(self->spec)) != 0) {
         if (!PyErr_Occurred())
             PyErr_SetString(
                 PyExc_RuntimeError,
@@ -43,7 +43,7 @@ static PyObject *_ctxmgr_enter(_ctxmgr *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyObject *_ctxmgr_exit(_ctxmgr *self, PyObject *args, PyObject *kwds) {
-    if (ScopeStack_PopScope(_scopedvar_current_stack, &(self->spec)) != 0) {
+    if (ScopeStack_ExitScope(_scopedvar_current_stack, &(self->spec)) != 0) {
         if (!PyErr_Occurred())
             PyErr_SetString(
                 PyExc_RuntimeError,
