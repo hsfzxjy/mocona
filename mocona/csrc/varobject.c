@@ -34,7 +34,10 @@ static inline int         _Var_SetCell(VarObject *self, CellObject *cell);
 #define ENSURE_MUTABLE(SELF, ERRVAL)                                           \
     do {                                                                       \
         if (!((VarObject *)(SELF))->mutable) {                                 \
-            PyErr_SetString(PyExc_RuntimeError, "var is not mutable");         \
+            PyErr_Format(                                                      \
+                PyExc_RuntimeError,                                            \
+                "var for '%S' is read-only",                                   \
+                Var_CAST(SELF)->decl);                                         \
             return (ERRVAL);                                                   \
         }                                                                      \
     } while (0);
@@ -47,7 +50,10 @@ static inline int         _Var_SetCell(VarObject *self, CellObject *cell);
         }                                                                      \
         if (!CELL->wrapped) {                                                  \
             PyErr_Format(                                                      \
-                PyExc_ValueError, "attached cell [%lu] is empty", CELL);       \
+                PyExc_ValueError,                                              \
+                "var for '%S' is empty (attached cell at %p)",                 \
+                Var_CAST(SELF)->decl,                                          \
+                CELL);                                                         \
             return (ERRVAL);                                                   \
         }                                                                      \
     } while (0);
@@ -823,7 +829,7 @@ static PyGetSetDef Var_getset[] = {
 
 PyTypeObject VarObject_Type = {
     PyVarObject_HEAD_INIT2(NULL, 0),
-    .tp_name = "Var",
+    .tp_name = "_scopedvar.Var",
     .tp_basicsize = sizeof(VarObject),
     .tp_itemsize = 0,
     .tp_dealloc = (destructor)Var_dealloc,
@@ -877,10 +883,7 @@ VarObject *Var_New(ScopeStackObject *stack, DeclObject *decl) {
 }
 
 int Var_Assign(VarObject *self, PyObject *rhs) {
-    if (!self->mutable) {
-        PyErr_SetString(PyExc_RuntimeError, "var is immutable");
-        return -1;
-    }
+    ENSURE_MUTABLE(self, -1)
     ENSURE_VAR_CACHE_UPDATED(self, -1)
     if (Py_TYPE(rhs) == &VarObject_Type) {
         ENSURE_VAR_CACHE_UPDATED(rhs, -1)

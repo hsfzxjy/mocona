@@ -1,17 +1,25 @@
-#ifndef _SCOPEDVAR__V_H
-#define _SCOPEDVAR__V_H
+#ifndef _SCOPEDVAR_NAMESPACE_H
+#define _SCOPEDVAR_NAMESPACE_H
 
 #include "common.h"
 
 #include "scopestackobject.h"
 
-PROTECTED PyTypeObject _V_Type;
+PROTECTED PyTypeObject NamespaceObject_Type;
 
 typedef struct {
     PyObject_HEAD;
-} _V;
 
-PROTECTED int _V_Init();
-PROTECTED _V *V_instance;
+    PyObject *data;
+} NamespaceObject;
+
+PROTECTED int NamespaceObject_Init();
+PROTECTED     PyObject *
+              NamespaceObject_GetAttr(NamespaceObject *self, PyObject *name);
+PROTECTED NamespaceObject *V_instance;
+
+#include "_trace_refcnt.h"
+
+DEFINE_REFCNT_TRACE_FOR(NAMESPACE)
 
 #endif

@@ -7,6 +7,7 @@ static PyObject *_scopedvar_get_refcnt_stats(PyObject *mod, PyObject *str) {
     TR_MATCH_UNICODE_RETURN_LONG(CELL)
     TR_MATCH_UNICODE_RETURN_LONG(DECL)
     TR_MATCH_UNICODE_RETURN_LONG(SCOPE)
+    TR_MATCH_UNICODE_RETURN_LONG(NAMESPACE)
     return NULL;
 }
 
@@ -14,6 +15,7 @@ static PyObject *_scopedvar_reset_refcnt_stats(PyObject *mod) {
     CELL_TRACE_RESET();
     DECL_TRACE_RESET();
     SCOPE_TRACE_RESET();
+    NAMESPACE_TRACE_RESET();
     Py_RETURN_NONE;
 }
 #endif
@@ -62,7 +64,8 @@ static PyObject *moduleinit(void) {
         PyType_Ready(&DeclObject_Type) < 0 ||
         PyType_Ready(&ScopeObject_Type) < 0 ||
         PyType_Ready(&ScopeStackObject_Type) < 0 ||
-        PyType_Ready(&_ctxmgr_Type) < 0 || _S_Init() < 0 || _V_Init() < 0)
+        PyType_Ready(&_ctxmgr_Type) < 0 || _S_Init() < 0 ||
+        NamespaceObject_Init() < 0)
         goto except;
 
     _scopedvar_current_stack = NEW_OBJECT(ScopeStackObject);

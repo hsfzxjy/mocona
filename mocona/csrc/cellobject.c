@@ -58,7 +58,7 @@ static PyObject *Cell_repr(CellObject *self) {
 
 PyTypeObject CellObject_Type = {
     PyVarObject_HEAD_INIT2(NULL, 0),
-    .tp_name = "Cell",
+    .tp_name = "_scopedvar.Cell",
     .tp_doc = "Cell",
     .tp_basicsize = sizeof(CellObject),
     .tp_dealloc = (destructor)Cell_dealloc,
@@ -80,7 +80,7 @@ int Cell_Assign(CellObject *self, PyObject *wrapped) {
     PyObject *object = NULL;
 
     if (!wrapped) {
-        PyErr_SetString(PyExc_RuntimeError, "wrapped is null-ptr");
+        PyErr_SetString(PyExc_RuntimeError, "cell value is null-ptr");
         goto except;
     }
 

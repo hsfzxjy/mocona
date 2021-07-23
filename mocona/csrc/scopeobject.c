@@ -65,7 +65,7 @@ static void Scope_dealloc(ScopeObject *self) {
 
 PyTypeObject ScopeObject_Type = {
     PyVarObject_HEAD_INIT2(NULL, 0),
-    .tp_name = "Scope",
+    .tp_name = "_scopedvar.Scope",
     .tp_doc = "Scope",
     .tp_basicsize = sizeof(ScopeObject),
     .tp_dealloc = (destructor)Scope_dealloc,
@@ -215,7 +215,7 @@ _Scope_AddCells(ScopeObject *self, PyObject *container, iteritemsproc getter) {
         } else if (Py_TYPE(decl) != &DeclObject_Type) {
             PyErr_Format(
                 PyExc_TypeError,
-                "expect a decl object, got '%s'",
+                "expect a declaration, got '%s'",
                 decl->ob_type->tp_name);
             goto except;
         }

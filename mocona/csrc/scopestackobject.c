@@ -63,7 +63,7 @@ static PyMethodDef ScopeStack_methods[] = {
 
 PyTypeObject ScopeStackObject_Type = {
     PyVarObject_HEAD_INIT2(NULL, 0),
-    .tp_name = "ScopeStack",
+    .tp_name = "_scopedvar.ScopeStack",
     .tp_doc = "ScopeStack",
     .tp_basicsize = sizeof(ScopeStackObject),
     .tp_dealloc = (destructor)ScopeStack_dealloc,

@@ -14,3 +14,9 @@
 
 #define NEW_OBJECT(TYPE)                                                       \
     (TYPE *)PyObject_CallFunction((PyObject *)&TYPE##_Type, NULL)
+
+#define ARGCHECK_SINGLE_STR                                                    \
+    PyObject *   arg = NULL;                                                   \
+    static char *empty_kwnames[] = {"name", NULL};                             \
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|", empty_kwnames, &arg))   \
+        goto except;

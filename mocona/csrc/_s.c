@@ -37,7 +37,7 @@ _S_assign(PyObject *self, PyObject *const *args, Py_ssize_t nargs) {
         return NULL;
     }
     if (Py_TYPE(args[0]) != &VarObject_Type) {
-        PyErr_SetString(PyExc_TypeError, "var should be a Var object");
+        PyErr_SetString(PyExc_TypeError, "expect a Var");
         return NULL;
     }
     VarObject *var = (VarObject *)args[0];
@@ -48,15 +48,18 @@ _S_assign(PyObject *self, PyObject *const *args, Py_ssize_t nargs) {
     return (PyObject *)var;
 }
 
+static PyObject *
+_S_BuildVar(PyObject *self, PyObject *decl_or_ns, PyObject *varname);
+
 static PyObject *_S__varfor(PyObject *self, PyObject *decl) {
     if (Py_TYPE(decl) != &DeclObject_Type) {
         PyErr_Format(
             PyExc_TypeError,
-            "expect a decl object, got %s",
+            "expect a declaration, got '%s'",
             decl->ob_type->tp_name);
         return NULL;
     }
-    return ScopeStack_GetVar(_scopedvar_current_stack, (DeclObject *)decl);
+    return _S_BuildVar(self, decl, NULL);
 }
 
 static PyObject *_S_isvar(PyObject *self, PyObject *arg) {
@@ -83,38 +86,42 @@ static PyObject *_S_isempty(PyObject *self, PyObject *arg) {
 }
 
 static PyObject *_S_inject(PyObject *self, PyObject *arg) {
-    if (Py_TYPE(arg) != &PyFunction_Type) {
-        PyErr_SetString(PyExc_TypeError, "expect a python function");
-        return NULL;
-    }
+#define BUILD_VAR_AND_CHECK(OBJ, VARNAME)                                      \
+    if (Py_TYPE((OBJ)) != &DeclObject_Type &&                                  \
+        Py_TYPE((OBJ)) != &NamespaceObject_Type)                               \
+        continue;                                                              \
+    PyObject *var = _S_BuildVar(self, (OBJ), (VARNAME));                       \
+    if (!var)                                                                  \
+        goto except;
+
     PyFunctionObject *func = (PyFunctionObject *)arg;
 
     PyObject *defaults = func->func_defaults;
     if (defaults) {
-        Py_ssize_t i;
-        for (i = 0; i < PyTuple_GET_SIZE(defaults); ++i) {
+#define CUR_ARGNAME() PyTuple_GET_ITEM(code->co_varnames, defaults_start_at + i)
+
+        PyCodeObject *code = (PyCodeObject *)func->func_code;
+
+        int defaults_count = PyTuple_GET_SIZE(defaults);
+        int defaults_start_at = code->co_argcount - defaults_count;
+        int i;
+
+        for (i = 0; i < defaults_count; ++i) {
             PyObject *item = PyTuple_GET_ITEM(defaults, i);
-            if (Py_TYPE(item) != &DeclObject_Type)
-                continue;
-            PyObject *var = _S__varfor(self, item);
-            if (!var)
-                goto except;
+            BUILD_VAR_AND_CHECK(item, CUR_ARGNAME());
             if (PyTuple_SetItem(defaults, i, var) < 0) {
                 Py_DECREF(var);
                 goto except;
             }
         }
+#undef CUR_ARGNAME
     }
     defaults = func->func_kwdefaults;
     if (defaults) {
         Py_ssize_t pos = 0;
         PyObject * key, *value;
         while (PyDict_Next(defaults, &pos, &key, &value)) {
-            if (Py_TYPE(value) != &DeclObject_Type)
-                continue;
-            PyObject *var = _S__varfor(self, value);
-            if (!var)
-                goto except;
+            BUILD_VAR_AND_CHECK(value, key);
             if (PyDict_SetItem(defaults, key, var) < 0) {
                 Py_DECREF(var);
                 goto except;
@@ -128,6 +135,7 @@ except:
 done:
     Py_INCREF(func);
     return (PyObject *)func;
+#undef BUILD_VAR_AND_CHECK
 }
 
 #define DECLARE_SCOPE_FUNCTION_ENTRY(NAME)                                     \
@@ -158,7 +166,6 @@ PyTypeObject _S_Type = {
 
     .tp_alloc = PyType_GenericAlloc,
     .tp_new = PyType_GenericNew,
-    .tp_free = PyObject_GC_Del,
     .tp_methods = methods,
 };
 
@@ -169,4 +176,65 @@ int _S_Init() {
     if (!(S_instance = NEW_OBJECT(_S)))
         return -1;
     return 0;
+}
+
+static PyObject *
+_S_BuildVar(PyObject *self, PyObject *decl_or_ns, PyObject *varname) {
+    DeclObject *decl = NULL;
+    PyObject *  decl_name = NULL;
+    PyObject *  result = NULL;
+
+    int free_decl = 0;
+
+    if (Py_TYPE(decl_or_ns) == &NamespaceObject_Type) {
+        decl = (DeclObject *)NamespaceObject_GetAttr(
+            (NamespaceObject *)decl_or_ns, varname);
+        if (!decl)
+            goto except;
+        free_decl = 1;
+
+    } else if (Py_TYPE(decl_or_ns) == &DeclObject_Type) {
+        decl = (DeclObject *)decl_or_ns;
+
+        if (!varname || decl->flags & DECL_FLAGS_NONSTRICT)
+            goto getvar;
+
+        decl_name = Decl_GetString(decl);
+        if (!decl_name)
+            goto except;
+
+        if (!PyUnicode_Tailmatch(decl_name, varname, 0, PY_SSIZE_T_MAX, 1))
+            goto name_mismatch;
+
+        Py_ssize_t name_at =
+            PyUnicode_GET_LENGTH(decl_name) - PyUnicode_GET_LENGTH(varname);
+        if (name_at > 0 && PyUnicode_READ_CHAR(decl_name, name_at - 1) != '/')
+            goto name_mismatch;
+
+        goto getvar;
+
+    } else {
+        goto except;
+    }
+
+getvar:
+    result = ScopeStack_GetVar(_scopedvar_current_stack, (DeclObject *)decl);
+    goto done;
+
+name_mismatch:
+    PyErr_Format(
+        PyExc_NameError,
+        "argument name %R mismatches strict declaration '/%S'. "
+        "Perhaps you want to\n"
+        " 1) suffix `[...]` to make it a namespace, or\n"
+        " 2) suffix `- 0` to make it non-strict.",
+        varname,
+        decl_name);
+    goto except;
+
+done:
+except:
+    if (free_decl)
+        Py_XDECREF(decl);
+    return result;
 }
