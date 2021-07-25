@@ -13,7 +13,7 @@ class Listener:
 
     __slots__ = "f", "weak", "once"
 
-    def __init__(self, f, /, weak: bool, once: bool):
+    def __init__(self, f, weak: bool, once: bool):
         self.weak = weak
         if weak:
             if inspect.ismethod(f):
@@ -30,7 +30,7 @@ class Listener:
             return self.f
 
 
-def _make_callable_key(f, /):
+def _make_callable_key(f):
     if inspect.ismethod(f):
         return (id(f.__self__), id(f.__func__))
     return id(f)
@@ -84,14 +84,14 @@ class EventEmitter:
         self.__call_listeners = defaultdict(type(None))
         self.__reversed_mapping = dict()
 
-    def __add_to_reversed_mapping(self, f, listener, /):
+    def __add_to_reversed_mapping(self, f, listener):
         key = _make_callable_key(f)
         if key not in self.__reversed_mapping:
             self.__reversed_mapping[key] = set()
         self.__reversed_mapping[key].add(listener)
 
     @_DottableMethod
-    def on(self, name: str, f=EMPTY, /, weak=False):
+    def on(self, name: str, f=EMPTY, weak=False):
         def _register(f):
             listener = Listener(f, weak=weak, once=False)
             self.__listeners[name].add(listener)
@@ -104,7 +104,7 @@ class EventEmitter:
         return _register(f)
 
     @_DottableMethod
-    def once(self, name: str, f=EMPTY, /):
+    def once(self, name: str, f=EMPTY):
         def _register(f):
             listener = Listener(f, weak=False, once=True)
             self.__listeners[name].add(listener)
@@ -117,7 +117,7 @@ class EventEmitter:
         return _register(f)
 
     @_DottableMethod
-    def oncall(self, name: str, f=EMPTY, /, weak=True):
+    def oncall(self, name: str, f=EMPTY, weak=True):
         def _register(f):
             assert self.__call_listeners[name] is None
             self.__call_listeners[name] = Listener(f, weak=weak, once=False)
@@ -148,7 +148,7 @@ class EventEmitter:
         return f(*args, **kwargs)
 
     @_DottableMethod
-    def off(self, name, f, /):
+    def off(self, name, f):
         key = _make_callable_key(f)
         assert key in self.__reversed_mapping
         reversed_set = self.__reversed_mapping[key]
@@ -160,5 +160,5 @@ class EventEmitter:
             del self.__reversed_mapping[key]
 
     @_DottableMethod
-    def offcall(self, name, /):
+    def offcall(self, name):
         self.__call_listeners[name] = None

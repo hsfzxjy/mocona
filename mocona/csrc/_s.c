@@ -33,9 +33,16 @@ DECLARE_SCOPE_FUNCTION(isolate_local, 0, 1, 0)
 
 static PyObject *
 _S_assign(PyObject *self, PyObject *const *args, Py_ssize_t nargs) {
+#if (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 8)
     if (!_PyArg_CheckPositional("assign", nargs, 2, 2)) {
         return NULL;
     }
+#else
+    if (nargs != 2) {
+        PyErr_SetString(PyExc_TypeError, "assign() takes exactly 2 arguments");
+        return NULL;
+    }
+#endif
     if (Py_TYPE(args[0]) != &VarObject_Type) {
         PyErr_SetString(PyExc_TypeError, "expect a Var");
         return NULL;
