@@ -1,5 +1,5 @@
 #include "Python.h"
-#include "hamt/pycore_hamt.h"
+#include "pycore/pycore_hamt.h"
 #include "structmember.h"
 
 #define PROTECTED extern __attribute__((visibility("hidden")))
