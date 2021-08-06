@@ -1,3 +1,6 @@
+#ifndef _SCOPEDVAR_COMMON_H
+#define _SCOPEDVAR_COMMON_H
+
 #include "Python.h"
 #include "structmember.h"
 
@@ -20,3 +23,5 @@
     static char *empty_kwnames[] = {"name", NULL};                             \
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|", empty_kwnames, &arg))   \
         goto except;
+
+#endif
