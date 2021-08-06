@@ -2,6 +2,8 @@
 #define Py_INTERNAL_HAMT_H
 
 #include "port.h"
+#undef _PyObject_GC_TRACK
+#define _PyObject_GC_TRACK(op) PyObject_GC_Track(op)
 
 #define _Py_HAMT_MAX_TREE_DEPTH 7
 
