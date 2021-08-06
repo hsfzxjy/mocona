@@ -31,12 +31,18 @@ static PyMethodDef methods[] = {
     {NULL},
 };
 
+static int _scopedvar_clear(PyObject *m) {
+    _PyHamt_Fini();
+    return 0;
+}
+
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
     .m_name = "_scopedvar",
     .m_doc = "",
     .m_size = -1,
     .m_methods = methods,
+    .m_clear = _scopedvar_clear,
 };
 
 #define ADD_OBJECT(NAME, O)                                                    \
@@ -65,7 +71,7 @@ static PyObject *moduleinit(void) {
         PyType_Ready(&ScopeObject_Type) < 0 ||
         PyType_Ready(&ScopeStackObject_Type) < 0 ||
         PyType_Ready(&_ctxmgr_Type) < 0 || _S_Init() < 0 ||
-        NamespaceObject_Init() < 0)
+        NamespaceObject_Init() < 0 || !_PyHamt_Init())
         goto except;
 
     _scopedvar_current_stack = NEW_OBJECT(ScopeStackObject);
