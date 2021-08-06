@@ -7,7 +7,7 @@
 PROTECTED PyTypeObject CellObject_Type;
 
 typedef struct _CellObject {
-    PyObject_HEAD;
+    PyObject_HEAD2;
     PyObject *          wrapped;
     PyObject *          dict;
     struct _CellObject *prev;

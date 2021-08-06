@@ -37,7 +37,7 @@ typedef struct {
 PROTECTED PyTypeObject ScopeObject_Type;
 
 typedef struct _ScopeObject {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 
     unsigned long attr;
     uint64_t      f_refcnt;

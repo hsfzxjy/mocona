@@ -8,7 +8,7 @@
 PROTECTED PyTypeObject _ctxmgr_Type;
 
 typedef struct {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 
     scopeinitspec spec;
 } _ctxmgr;

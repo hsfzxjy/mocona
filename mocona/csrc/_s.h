@@ -8,7 +8,7 @@
 PROTECTED PyTypeObject _S_Type;
 
 typedef struct {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 } _S;
 
 PROTECTED int _S_Init();

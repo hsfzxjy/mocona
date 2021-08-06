@@ -15,6 +15,7 @@
     } while (0);
 
 #define PyVarObject_HEAD_INIT2(type, size) PyObject_HEAD_INIT(type) size
+#define PyObject_HEAD2 PyObject ob_base
 
 #define NEW_OBJECT(TYPE)                                                       \
     (TYPE *)PyObject_CallFunction((PyObject *)&TYPE##_Type, NULL)

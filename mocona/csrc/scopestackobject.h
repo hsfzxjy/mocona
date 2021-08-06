@@ -8,7 +8,7 @@
 PROTECTED PyTypeObject ScopeStackObject_Type;
 
 typedef struct {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 
     ScopeObject *top_global_scope;
     PyObject *   ctxvar_scope;

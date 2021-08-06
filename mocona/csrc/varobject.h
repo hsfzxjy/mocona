@@ -12,7 +12,7 @@ PROTECTED PyTypeObject VarObject_Type;
 #define Var_CAST(OP) ((VarObject *)(OP))
 
 typedef struct {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 
     unsigned char mutable;
     CellObject *cell;

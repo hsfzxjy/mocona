@@ -8,7 +8,7 @@
 PROTECTED PyTypeObject NamespaceObject_Type;
 
 typedef struct {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 
     PyObject *data;
 } NamespaceObject;

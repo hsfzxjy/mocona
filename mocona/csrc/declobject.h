@@ -6,7 +6,7 @@
 PROTECTED PyTypeObject DeclObject_Type;
 
 typedef struct {
-    PyObject_HEAD;
+    PyObject_HEAD2;
 
     unsigned long     flags;
     PyObject *        data;
