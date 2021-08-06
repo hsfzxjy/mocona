@@ -1,8 +1,8 @@
 #include "Python.h"
-#include "pycore/pycore_hamt.h"
 #include "structmember.h"
 
-#define PROTECTED extern __attribute__((visibility("hidden")))
+#include "pycore/hamt.h"
+#include "pycore/port.h"
 
 #define DBG(x)                                                                 \
     do {                                                                       \
