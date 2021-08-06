@@ -1,8 +1,9 @@
+PY?=python3
 dev:
-	python3 setup.py build_ext -b . -DTRACE_REFCNT
+	$(PY) setup.py build_ext -b . -DTRACE_REFCNT
 clean:
 	rm mocona/*.so
 install:
-	python3 setup.py install --user
+	$(PY) setup.py install --user
 test:
-	PYTHONPATH=. pytest tests/
+	$(PY) -m pytest tests/
