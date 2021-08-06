@@ -1,10 +1,20 @@
+import sys
 from glob import glob
+
 from setuptools import setup, Extension, find_packages
+import distutils
+
+sources = glob("mocona/csrc/*.c") + glob("mocona/csrc/*/*.c")
+
+if distutils.ccompiler.get_default_compiler() == "unix":
+    compile_args = ["-Wno-missing-braces"]
+else:
+    compile_args = []
 
 _scopedvar_module = Extension(
     "mocona._scopedvar",
-    sources=glob("mocona/csrc/*.c"),
-    extra_compile_args=["-Wno-missing-braces"],
+    sources=sources,
+    extra_compile_args=compile_args,
 )
 
 setup(
