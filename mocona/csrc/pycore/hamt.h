@@ -1,6 +1,7 @@
 #ifndef Py_INTERNAL_HAMT_H
 #define Py_INTERNAL_HAMT_H
 
+#include "port.h"
 
 #define _Py_HAMT_MAX_TREE_DEPTH 7
 
@@ -58,24 +59,24 @@ typedef struct {
 } PyHamtIterator;
 
 
-PyAPI_DATA(PyTypeObject) _PyHamt_Type;
-PyAPI_DATA(PyTypeObject) _PyHamt_ArrayNode_Type;
-PyAPI_DATA(PyTypeObject) _PyHamt_BitmapNode_Type;
-PyAPI_DATA(PyTypeObject) _PyHamt_CollisionNode_Type;
-PyAPI_DATA(PyTypeObject) _PyHamtKeys_Type;
-PyAPI_DATA(PyTypeObject) _PyHamtValues_Type;
-PyAPI_DATA(PyTypeObject) _PyHamtItems_Type;
+PROTECTED PyTypeObject _PyHamt_Type;
+PROTECTED PyTypeObject _PyHamt_ArrayNode_Type;
+PROTECTED PyTypeObject _PyHamt_BitmapNode_Type;
+PROTECTED PyTypeObject _PyHamt_CollisionNode_Type;
+PROTECTED PyTypeObject _PyHamtKeys_Type;
+PROTECTED PyTypeObject _PyHamtValues_Type;
+PROTECTED PyTypeObject _PyHamtItems_Type;
 
 
 /* Create a new HAMT immutable mapping. */
-PyHamtObject * _PyHamt_New(void);
+PROTECTED PyHamtObject * _PyHamt_New(void);
 
 /* Return a new collection based on "o", but with an additional
    key/val pair. */
-PyHamtObject * _PyHamt_Assoc(PyHamtObject *o, PyObject *key, PyObject *val);
+PROTECTED PyHamtObject * _PyHamt_Assoc(PyHamtObject *o, PyObject *key, PyObject *val);
 
 /* Return a new collection based on "o", but without "key". */
-PyHamtObject * _PyHamt_Without(PyHamtObject *o, PyObject *key);
+PROTECTED PyHamtObject * _PyHamt_Without(PyHamtObject *o, PyObject *key);
 
 /* Find "key" in the "o" collection.
 
@@ -84,7 +85,7 @@ PyHamtObject * _PyHamt_Without(PyHamtObject *o, PyObject *key);
    - 0: "key" wasn't found in "o".
    - 1: "key" is in "o"; "*val" is set to its value (a borrowed ref).
 */
-int _PyHamt_Find(PyHamtObject *o, PyObject *key, PyObject **val);
+PROTECTED int _PyHamt_Find(PyHamtObject *o, PyObject *key, PyObject **val);
 
 /* Check if "v" is equal to "w".
 
@@ -93,21 +94,21 @@ int _PyHamt_Find(PyHamtObject *o, PyObject *key, PyObject **val);
    - 1: v == w
    - -1: An error occurred.
 */
-int _PyHamt_Eq(PyHamtObject *v, PyHamtObject *w);
+PROTECTED int _PyHamt_Eq(PyHamtObject *v, PyHamtObject *w);
 
 /* Return the size of "o"; equivalent of "len(o)". */
-Py_ssize_t _PyHamt_Len(PyHamtObject *o);
+PROTECTED Py_ssize_t _PyHamt_Len(PyHamtObject *o);
 
 /* Return a Keys iterator over "o". */
-PyObject * _PyHamt_NewIterKeys(PyHamtObject *o);
+PROTECTED PyObject * _PyHamt_NewIterKeys(PyHamtObject *o);
 
 /* Return a Values iterator over "o". */
-PyObject * _PyHamt_NewIterValues(PyHamtObject *o);
+PROTECTED PyObject * _PyHamt_NewIterValues(PyHamtObject *o);
 
 /* Return a Items iterator over "o". */
-PyObject * _PyHamt_NewIterItems(PyHamtObject *o);
+PROTECTED PyObject * _PyHamt_NewIterItems(PyHamtObject *o);
 
-int _PyHamt_Init(void);
-void _PyHamt_Fini(void);
+PROTECTED int _PyHamt_Init(void);
+PROTECTED void _PyHamt_Fini(void);
 
 #endif /* !Py_INTERNAL_HAMT_H */
