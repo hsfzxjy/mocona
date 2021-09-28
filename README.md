@@ -11,12 +11,10 @@ pip install git+https://github.com/hsfzxjy/mocona
 # if you want a developing version
 ```
 
-The following sections explain _how_ and _why_ to use certain tools provided by **mocona**.
+This is originally a self-use library. It would violate [PEP 20 -- The Zen of Python](https://www.python.org/dev/peps/pep-0020/). It is not explicit and somehow magical. For whom interested in its story, here's a series of blog posts on the motivation, usage and technical details
 
-## Dependency Injection and `mocona.scopedvar`
+-   [Part 0 - Preface](http://i.hsfzxjy.site/2021-09-12-unravelling-mocona-preface/)
+-   [Part 1 - Verbosity or Anti-Pattern](http://i.hsfzxjy.site/2021-09-16-unravelling-mocona-verbosity-or-anti-pattern/)
+-   TO BE CONTINUED
 
-TODO
-
-## Event Emitter and `mocona.events`
-
-TODO
+If you want to argue upon the philosophy of design, please don't; if you find it useful, I would be glad to hear that.
