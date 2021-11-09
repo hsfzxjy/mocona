@@ -19,7 +19,7 @@ _scopedvar_module = Extension(
 
 setup(
     name="mocona",
-    version="0.1.0",
+    version="0.1.1",
     description="TODO",
     ext_modules=[_scopedvar_module],
     packages=find_packages(".", exclude=("*.so",)),
