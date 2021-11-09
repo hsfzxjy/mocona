@@ -289,3 +289,25 @@ def test_call():
     with S.isolate():
         S.assign(var, _Dummy)
         assert var(0) == _Dummy(0)
+
+
+def test_iter():
+    var = S._varfor(V.a)
+    with S.isolate():
+        S.assign(var, [0])
+        assert next(iter(var)) == 0
+
+        S.assign(var, 0)
+        with pytest.raises(TypeError):
+            iter(var)
+
+
+def test_iternext():
+    var = S._varfor(V.a)
+    with S.isolate():
+        S.assign(var, iter([0]))
+        assert next(var) == 0
+
+        S.assign(var, 0)
+        with pytest.raises(TypeError):
+            iter(var)
