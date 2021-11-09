@@ -743,6 +743,23 @@ static PyObject *Var_iter(VarObject *self) {
     return PyObject_GetIter(cell->wrapped);
 }
 
+static PyObject *Var_next(VarObject *self) {
+    ENSURE_VAR_CACHE_UPDATED(self, NULL)
+    DECLARE_CELL(self, cell)
+    ENSURE_NOT_EMPTY(self, NULL)
+
+    PyObject *it = cell->wrapped;
+    if (!PyIter_Check(it)) {
+        PyErr_Format(
+            PyExc_TypeError,
+            "'%.200s' object is not an iterator",
+            it->ob_type->tp_name);
+        return NULL;
+    }
+
+    return (*it->ob_type->tp_iternext)(it);
+}
+
 static PyNumberMethods Var_as_number = {
     .nb_add = (binaryfunc)Var_add,
     .nb_subtract = (binaryfunc)Var_subtract,
@@ -848,6 +865,7 @@ PyTypeObject VarObject_Type = {
     .tp_richcompare = (richcmpfunc)Var_richcompare,
     .tp_weaklistoffset = offsetof(VarObject, weakreflist),
     .tp_iter = (getiterfunc)Var_iter,
+    .tp_iternext = (unaryfunc)Var_next,
     .tp_methods = Var_methods,
     .tp_getset = Var_getset,
     .tp_alloc = PyType_GenericAlloc,
