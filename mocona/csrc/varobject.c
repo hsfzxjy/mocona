@@ -919,3 +919,18 @@ int Var_IsEmpty(VarObject *self) {
     DECLARE_CELL(self, cell)
     return cell->wrapped == NULL ? 1 : 0;
 }
+
+PyObject *Var_Unwrap(VarObject *self) {
+    ENSURE_VAR_CACHE_UPDATED(self, NULL)
+    DECLARE_CELL(self, cell)
+    if (!cell->wrapped) {
+        PyErr_Format(
+            PyExc_ValueError,
+            "var for '%S' is empty (attached cell at %p)",
+            self->decl,
+            cell);
+        return NULL;
+    }
+    Py_INCREF(cell->wrapped);
+    return cell->wrapped;
+}

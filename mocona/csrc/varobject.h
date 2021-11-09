@@ -28,4 +28,5 @@ typedef struct {
 PROTECTED VarObject *Var_New(ScopeStackObject *stack, DeclObject *decl);
 PROTECTED int        Var_Assign(VarObject *self, PyObject *rhs);
 PROTECTED int        Var_IsEmpty(VarObject *self);
+PROTECTED PyObject *Var_Unwrap(VarObject *self);
 #endif

@@ -92,6 +92,14 @@ static PyObject *_S_isempty(PyObject *self, PyObject *arg) {
     }
 }
 
+static PyObject *_S_unwrap(PyObject *self, PyObject *arg) {
+    if (Py_TYPE(arg) != &VarObject_Type) {
+        PyErr_SetString(PyExc_RuntimeError, "expect a Var");
+        return NULL;
+    }
+    return Var_Unwrap(Var_CAST(arg));
+}
+
 static PyObject *_S_inject(PyObject *self, PyObject *arg) {
 #define BUILD_VAR_AND_CHECK(OBJ, VARNAME)                                      \
     if (Py_TYPE((OBJ)) != &DeclObject_Type &&                                  \
@@ -152,6 +160,7 @@ static PyMethodDef methods[] = {
     {"assign", (PyCFunction)_S_assign, METH_FASTCALL, 0},
     {"isvar", (PyCFunction)_S_isvar, METH_O, 0},
     {"isempty", (PyCFunction)_S_isempty, METH_O, 0},
+    {"unwrap", (PyCFunction)_S_unwrap, METH_O, 0},
     {"inject", (PyCFunction)_S_inject, METH_O, 0},
     {"_varfor", (PyCFunction)_S__varfor, METH_O, 0},
     DECLARE_SCOPE_FUNCTION_ENTRY(patch),
