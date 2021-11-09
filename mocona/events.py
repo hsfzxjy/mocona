@@ -69,6 +69,11 @@ class _DottableMethod(T.Generic[F]):
         return _Getter(instance, self.__func)
 
 
+def _drop_keys_from_dict(dct, keys):
+    for key in keys:
+        dct.pop(key)
+
+
 class EventEmitter:
     __slots__ = (
         "__listeners",
@@ -80,7 +85,7 @@ class EventEmitter:
 
     def __init__(self, name: str = ""):
         self.__name = name
-        self.__listeners = defaultdict(set)
+        self.__listeners = defaultdict(dict)
         self.__call_listeners = defaultdict(type(None))
         self.__reversed_mapping = dict()
 
@@ -94,7 +99,7 @@ class EventEmitter:
     def on(self, name: str, f=EMPTY, weak=False):
         def _register(f):
             listener = Listener(f, weak=weak, once=False)
-            self.__listeners[name].add(listener)
+            self.__listeners[name][listener] = 1
             self.__add_to_reversed_mapping(f, listener)
             return f
 
@@ -107,7 +112,7 @@ class EventEmitter:
     def once(self, name: str, f=EMPTY):
         def _register(f):
             listener = Listener(f, weak=False, once=True)
-            self.__listeners[name].add(listener)
+            self.__listeners[name][listener] = 1
             self.__add_to_reversed_mapping(f, listener)
             return f
 
@@ -137,7 +142,8 @@ class EventEmitter:
                 to_remove.add(listener)
             if f is not None:
                 f(*args, **kwargs)
-        self.__listeners[name] -= to_remove
+
+        _drop_keys_from_dict(self.__listeners[name], to_remove)
 
     @_DottableMethod
     def call(self, name, *args, **kwargs):
@@ -152,9 +158,9 @@ class EventEmitter:
         key = _make_callable_key(f)
         assert key in self.__reversed_mapping
         reversed_set = self.__reversed_mapping[key]
-        listeners_set = self.__listeners[name]
-        listeners_to_remove = reversed_set & listeners_set
-        listeners_set.difference_update(listeners_to_remove)
+        listeners_dict = self.__listeners[name]
+        listeners_to_remove = reversed_set & set(listeners_dict)
+        _drop_keys_from_dict(listeners_dict, listeners_to_remove)
         reversed_set.difference_update(listeners_to_remove)
         if not reversed_set:
             del self.__reversed_mapping[key]
